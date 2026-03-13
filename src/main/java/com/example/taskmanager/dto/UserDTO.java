@@ -15,7 +15,7 @@ public class UserDTO {
     private String email;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    // This might slow down user operations so not adviced
+    // This might slow down user operations so not advised
     // but this is how it would be done:
     // private List<TaskDTO> tasks;
     // private List<ContextDTO> contexts;

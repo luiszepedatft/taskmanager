@@ -20,4 +20,5 @@ public class UpdateTaskRequest {
     private LocalDate completionDate;
     private Boolean done;
     private Boolean archived;
+    private Long contextId;
 }
