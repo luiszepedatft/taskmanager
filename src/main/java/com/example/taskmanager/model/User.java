@@ -35,21 +35,20 @@ public class User {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Context> contexts = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Task> tasks = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Context> contexts = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Task> tasks = new ArrayList<>();
 
 }

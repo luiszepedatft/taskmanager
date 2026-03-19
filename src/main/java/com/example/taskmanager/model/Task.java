@@ -42,25 +42,24 @@ public class Task {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+    @ManyToOne
+    @JoinColumn(name = "context_id")
+    private Context context;
 
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         if (this.done == null) this.done = false;
         if (this.archived == null) this.archived = false;
+        this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "context_id")
-    private Context context;
 
 }
