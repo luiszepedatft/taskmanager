@@ -63,7 +63,8 @@ public class TaskService {
                 task.setContext(context);
             }
             taskMapper.updateEntityFromRequest(request, task);
-            return taskMapper.toDTO(task);
+            Task savedTask = taskRepository.save(task);
+            return taskMapper.toDTO(savedTask);
     }
 
     public void deleteTaskById(Long taskId, String username) {

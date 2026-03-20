@@ -4,6 +4,7 @@ import com.example.taskmanager.dto.CreateUserRequest;
 import com.example.taskmanager.dto.LoginRequest;
 import com.example.taskmanager.dto.UserDTO;
 import com.example.taskmanager.exception.DuplicateResourceException;
+import com.example.taskmanager.exception.UnauthorizedException;
 import com.example.taskmanager.mapper.UserMapper;
 import com.example.taskmanager.model.User;
 import com.example.taskmanager.repository.UserRepository;
@@ -111,6 +112,45 @@ public class UserServiceTest {
             verify(userRepository, never()).save(any());
         }
 
+    }
+
+    @Nested
+    @DisplayName("Login user test")
+    class LoginUserTest{
+        @Test
+        @DisplayName("should return a token on valid login")
+        void shouldLoginUser(){
+            // arrange
+            when(userRepository.findByUsername("username")).thenReturn(Optional.of(user));
+            when(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())).thenReturn(true);
+            when(jwtUtil.generateToken(any())).thenReturn("token");
+
+            // Act
+            String token = userService.login(loginRequest);
+
+            // Assert
+            assertThat(token).isEqualTo("token");
+            // Verify
+            verify(userRepository).findByUsername(user.getUsername());
+            verify(jwtUtil).generateToken(user.getUsername());
+
+        }
+
+        @Test
+        @DisplayName("should throw exception on wrong password")
+        void should_Throw_Exception_On_Wrong_Password(){
+            // Arrange
+            when(userRepository.findByUsername("username")).thenReturn(Optional.of(user));
+            when(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())).thenReturn(false);
+
+            // Act
+            assertThatThrownBy(() -> userService.login(loginRequest))
+                    .isInstanceOf(UnauthorizedException.class)
+                    .hasMessageContaining("not authorized");
+
+            // verify
+            verify(jwtUtil, never()).generateToken(any());
+        }
     }
 
 }
