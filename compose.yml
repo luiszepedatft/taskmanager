@@ -9,5 +9,17 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  task-service:
+    image: localhost/task-service:latest
+    ports:
+      - "8080:8080"
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/taskmanager
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      - postgres
+
 volumes:
   postgres_data:

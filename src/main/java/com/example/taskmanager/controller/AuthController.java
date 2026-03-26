@@ -5,6 +5,7 @@ import com.example.taskmanager.dto.LoginRequest;
 import com.example.taskmanager.dto.UserDTO;
 import com.example.taskmanager.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +26,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody CreateUserRequest createUserRequest) {
         UserDTO userDTO = userService.register(createUserRequest);
-        return ResponseEntity.ok(userDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
     }
 
 
