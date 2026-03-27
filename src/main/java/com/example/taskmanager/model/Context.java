@@ -10,6 +10,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "contexts", uniqueConstraints = {
+        // this makes that the combination of name of the context
+        // and owner of the context are unique. Making it so that
+        // any user can only have 1 context with a particular name.
+        // but context names can repeat across users.
         @UniqueConstraint(columnNames = {"name", "user_id"})
 })
 @Data
@@ -20,7 +24,7 @@ public class Context {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="name",  nullable = false, unique = true)
+    @Column(name="name",  nullable = false)
     private String name;
 
     @Column(name="description",  nullable = false )
