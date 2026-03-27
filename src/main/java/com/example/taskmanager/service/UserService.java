@@ -12,12 +12,21 @@ import com.example.taskmanager.repository.UserRepository;
 import com.example.taskmanager.security.JwtUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Retryable(
+        includes = { DataAccessException.class},
+        maxRetries = 3,
+        delayString = "500ms",
+        multiplier = 2,
+        maxDelay = 5000
+)
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;

@@ -18,6 +18,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataAccessException;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +27,13 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Retryable(
+        includes = { DataAccessException.class},
+        maxRetries = 3,
+        delayString = "500ms",
+        multiplier = 2,
+        maxDelay = 5000
+)
 public class ContextService {
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
