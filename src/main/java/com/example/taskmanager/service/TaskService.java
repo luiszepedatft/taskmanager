@@ -14,6 +14,8 @@ import com.example.taskmanager.repository.TaskRepository;
 import com.example.taskmanager.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,11 +52,13 @@ public class TaskService {
 
     }
 
+    @Cacheable(value = "tasks", key = "#taskId")
     public TaskDTO getTaskById(Long taskId, String username) {
         Task task = verifyOwnership(taskId,username);
         return taskMapper.toDTO(task);
     }
 
+    @CacheEvict(value = "tasks", key = "#taskId")
     public TaskDTO updateTaskById(Long taskId, UpdateTaskRequest request, String username) {
         Task task = verifyOwnership(taskId,username);
             if (request.getContextId() != null) {
@@ -67,6 +71,7 @@ public class TaskService {
             return taskMapper.toDTO(savedTask);
     }
 
+    @CacheEvict(value = "tasks", key = "#taskId")
     public void deleteTaskById(Long taskId, String username) {
         Task task = verifyOwnership(taskId,username);
         taskRepository.delete(task);

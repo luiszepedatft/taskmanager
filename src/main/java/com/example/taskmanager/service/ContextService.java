@@ -16,6 +16,8 @@ import com.example.taskmanager.repository.TaskRepository;
 import com.example.taskmanager.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,17 +48,20 @@ public class ContextService {
         return contextMapper.toDTO(contexts);
     }
 
+    @Cacheable(value = "contexts", key = "#contextId")
     public ContextDTO getContextById(Long contextId, String username) {
         Context context = verifyOwnership(contextId, username);
         return contextMapper.toDTO(context);
     }
 
+    @CacheEvict(value = "contexts", key = "#contextId")
     public ContextDTO updateContextById(Long contextId, UpdateContextRequest request, String username) {
         Context context = verifyOwnership(contextId, username);
         contextMapper.updateEntityFromRequest(request, context);
         return contextMapper.toDTO(contextRepository.save(context));
     }
 
+    @CacheEvict(value = "contexts", key = "#contextId")
     public void deleteContextById(Long contextId, String username) {
         Context context = verifyOwnership(contextId, username);
         contextRepository.delete(context);
