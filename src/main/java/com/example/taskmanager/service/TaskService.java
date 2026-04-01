@@ -12,6 +12,7 @@ import com.example.taskmanager.model.User;
 import com.example.taskmanager.repository.ContextRepository;
 import com.example.taskmanager.repository.TaskRepository;
 import com.example.taskmanager.repository.UserRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -47,7 +48,11 @@ public class TaskService {
         if (request.getContextId() != null) {
             Context context = contextRepository.findById(request.getContextId())
                     .orElseThrow(() -> new ResourceNotFoundException("Context",  "contextId", request.getContextId()));
-            newTask.setContext(context);
+            if (context.getUser().getId().equals(user.getId())) {
+                newTask.setContext(context);
+            } else {
+                throw new UnauthorizedException();
+            }
         }
         Task savedTask = taskRepository.save(newTask);
         return taskMapper.toDTO(savedTask);
@@ -61,11 +66,17 @@ public class TaskService {
 
     }
 
+    @CircuitBreaker(name = "taskService", fallbackMethod = "getTaskFallback")
     @Cacheable(value = "tasks", key = "#taskId")
     public TaskDTO getTaskById(Long taskId, String username) {
         Task task = verifyOwnership(taskId,username);
         return taskMapper.toDTO(task);
     }
+
+    private TaskDTO getTaskFallback(Long taskId, String username, Throwable ex) {
+        throw new RuntimeException("Task is unavailable, try again later", ex);
+    }
+
 
     @CacheEvict(value = "tasks", key = "#taskId")
     public TaskDTO updateTaskById(Long taskId, UpdateTaskRequest request, String username) {
@@ -73,7 +84,11 @@ public class TaskService {
             if (request.getContextId() != null) {
                 Context context = contextRepository.findById(request.getContextId())
                         .orElseThrow(() -> new ResourceNotFoundException("Context", "id", request.getContextId()));
-                task.setContext(context);
+                if (context.getUser().getId().equals(task.getUser().getId())) {
+                    task.setContext(context);
+                } else {
+                    throw new UnauthorizedException();
+                }
             }
             taskMapper.updateEntityFromRequest(request, task);
             Task savedTask = taskRepository.save(task);
